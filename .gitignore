@@ -24,3 +24,6 @@ fmodstudioapi*/
 
 # Ignore Gradle build output directory
 build
+
+.envrc
+.direnv/
