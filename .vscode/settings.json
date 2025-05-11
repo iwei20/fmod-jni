@@ -1,4 +1,5 @@
 {
     "java.configuration.updateBuildConfiguration": "automatic",
-    "java.jdt.ls.java.home": "/nix/store/5yii18di89wpxcffk3cihpzfdrzw54gl-openjdk-21.0.7+6"
+    "java.jdt.ls.java.home": "/nix/store/5yii18di89wpxcffk3cihpzfdrzw54gl-openjdk-21.0.7+6/lib/openjdk",
+    "java.import.gradle.java.home": "/nix/store/5yii18di89wpxcffk3cihpzfdrzw54gl-openjdk-21.0.7+6/lib/openjdk"
 }

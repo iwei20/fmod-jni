@@ -18,9 +18,9 @@ repositories {
 dependencies {
     // Use JUnit Jupiter for testing.
     testImplementation(libs.junit.jupiter)
+    testImplementation("commons-io:commons-io:2.18.0")
 
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    testRuntimeOnly("commons-io:commons-io:2.19.0")
 
     // This dependency is exported to consumers, that is to say found on their compile classpath.
     api(libs.commons.math3)
