@@ -21,3 +21,6 @@ gradle-app.setting
 .classpath
 
 fmodstudioapi*/
+
+# Ignore Gradle build output directory
+build
