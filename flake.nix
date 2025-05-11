@@ -20,6 +20,7 @@
           packages = with pkgs; [
             gradle
             jdk
+            swig
           ];
 
           env = {
