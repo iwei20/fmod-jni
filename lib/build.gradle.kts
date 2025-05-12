@@ -31,7 +31,6 @@ tasks.named<Test>("test") {
 }
 
 tasks.withType<JavaCompile> {
-    options.getCompilerArgs().add("-Xlint:-removal")
     options.getCompilerArgs().add("--enable-preview")
 }
 
