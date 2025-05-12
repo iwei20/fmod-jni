@@ -20,7 +20,7 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testImplementation("commons-io:commons-io:2.18.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    compileOnly(files("fmod-jextract.jar")) // The FMOD and FMODStudio bindings
+    implementation(files("fmod-jextract.jar")) // The FMOD and FMODStudio bindings
 }
 
 tasks.named<Test>("test") {
@@ -28,6 +28,7 @@ tasks.named<Test>("test") {
     useJUnitPlatform()
 
     testLogging.showStandardStreams = true;
+    jvmArgs("--enable-preview", "--enable-native-access=ALL-UNNAMED")
 }
 
 tasks.withType<JavaCompile> {
