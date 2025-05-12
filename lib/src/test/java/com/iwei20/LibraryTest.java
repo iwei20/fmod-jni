@@ -5,7 +5,7 @@ package com.iwei20;
 
 import org.junit.jupiter.api.Test;
 
-import com.iwei20.fmod.FModStudioLibrary;
+import com.iwei20.fmod.FModStudio;
 import com.sun.jna.Memory;
 import com.sun.jna.Pointer;
 
@@ -16,11 +16,11 @@ class LibraryTest {
     @Test void creationAndRelease() {
         Memory systemPointer = new Memory(16);
         int result;
-        result = FModStudioLibrary.INSTANCE.FMOD_Studio_System_Create(systemPointer, FModStudioLibrary.FMOD_VERSION);
+        result = FModStudio.INSTANCE.FMOD_Studio_System_Create(systemPointer, FModStudio.FMOD_VERSION);
         assertEquals(result, 0, "Studio system creation failed!");
         
         Pointer system = systemPointer.getPointer(0);
-        result = FModStudioLibrary.INSTANCE.FMOD_Studio_System_Release(system);
+        result = FModStudio.INSTANCE.FMOD_Studio_System_Release(system);
         assertEquals(result, 0, "Studio system release failed!");
     }
 
