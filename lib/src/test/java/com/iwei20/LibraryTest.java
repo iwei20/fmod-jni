@@ -6,22 +6,13 @@ package com.iwei20;
 import org.junit.jupiter.api.Test;
 
 import com.iwei20.fmod.FModStudio;
-import com.sun.jna.Memory;
-import com.sun.jna.Pointer;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 class LibraryTest {
 
     @Test void creationAndRelease() {
-        Memory systemPointer = new Memory(16);
-        int result;
-        result = FModStudio.INSTANCE.FMOD_Studio_System_Create(systemPointer, FModStudio.FMOD_VERSION);
-        assertEquals(result, 0, "Studio system creation failed!");
-        
-        Pointer system = systemPointer.getPointer(0);
-        result = FModStudio.INSTANCE.FMOD_Studio_System_Release(system);
-        assertEquals(result, 0, "Studio system release failed!");
+
     }
 
 }

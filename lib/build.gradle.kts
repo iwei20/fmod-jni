@@ -20,7 +20,7 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testImplementation("commons-io:commons-io:2.18.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    implementation("net.java.dev.jna:jna:5.16.0")
+    compileOnly(files("fmodstudio-jextract.jar"))
 }
 
 tasks.named<Test>("test") {
