@@ -5,7 +5,11 @@ import com.sun.jna.Native;
 import com.sun.jna.Pointer;
 
 public interface FModStudioLibrary extends Library {
-    FModStudioLibrary INSTANCE = (FModStudioLibrary)Native.load("fmodstudio", FModStudioLibrary.class);
+    FModStudioLibrary INSTANCE = (FModStudioLibrary)Native.load("fmodstudioL", FModStudioLibrary.class);
 
-    int FMOD_Studio_System_Create(Pointer system, int headerversion);
+    // Hardcoded for now
+    int FMOD_VERSION = 0x00020307;
+
+    int FMOD_Studio_System_Create(Pointer systemPointer, int headerversion);
+    int FMOD_Studio_System_Release(Pointer system);
 }

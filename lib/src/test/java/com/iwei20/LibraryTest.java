@@ -4,38 +4,24 @@
 package com.iwei20;
 
 import org.junit.jupiter.api.Test;
+
+import com.iwei20.fmod.FModStudioLibrary;
+import com.sun.jna.Memory;
+import com.sun.jna.Pointer;
+
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.BufferedOutputStream;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 class LibraryTest {
-    static {
-        InputStream fmodIn   = LibraryTest.class.getResourceAsStream("core/lib/x86_64/libfmod.so");
-        InputStream studioIn = LibraryTest.class.getResourceAsStream("studio/lib/x86_64/libfmodstudio.so");
 
-        try {
-            File tempFmod = File.createTempFile("libfmod", ".so");
-            tempFmod.deleteOnExit();
-
-            File tempStudio = File.createTempFile("libfmodstudio", ".so");
-            tempStudio.deleteOnExit();
-
-            try (OutputStream out = new BufferedOutputStream(new FileOutputStream(tempFmod))) {
-                
-            }
-
-        } catch (IOException e) {
-            System.err.println("Failed to load libfmod.so!");
-            e.printStackTrace();
-        }
+    @Test void creationAndRelease() {
+        Memory systemPointer = new Memory(16);
+        int result;
+        result = FModStudioLibrary.INSTANCE.FMOD_Studio_System_Create(systemPointer, FModStudioLibrary.FMOD_VERSION);
+        assertEquals(result, 0, "Studio system creation failed!");
+        
+        Pointer system = systemPointer.getPointer(0);
+        result = FModStudioLibrary.INSTANCE.FMOD_Studio_System_Release(system);
+        assertEquals(result, 0, "Studio system release failed!");
     }
-    
-    @Test void someLibraryMethodReturnsTrue() {
-        assertTrue(true, "someLibraryMethod should return 'true'");
-    }
+
 }
