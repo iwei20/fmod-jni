@@ -31,3 +31,14 @@ tasks.named<Test>("test") {
 tasks.withType<JavaCompile> {
     options.getCompilerArgs().add("-Xlint:-removal")
 }
+
+tasks.withType<JavaCompile>().configureEach {
+    options.release = 21
+}
+
+java {
+    withSourcesJar()
+
+    sourceCompatibility = JavaVersion.VERSION_21
+    targetCompatibility = JavaVersion.VERSION_21
+}
