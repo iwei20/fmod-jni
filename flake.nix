@@ -20,7 +20,7 @@
           packages = with pkgs; [
             gradle
             jdk
-            swig
+            jextract-21
           ];
 
           env = {
