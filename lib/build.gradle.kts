@@ -20,7 +20,7 @@ dependencies {
     testImplementation(libs.junit.jupiter)
     testImplementation("commons-io:commons-io:2.18.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
-    compileOnly(files("fmodstudio-jextract.jar"))
+    compileOnly(files("fmod-jextract.jar")) // The FMOD and FMODStudio bindings
 }
 
 tasks.named<Test>("test") {

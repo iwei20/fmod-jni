@@ -1,6 +1,6 @@
 package com.iwei20.fmod;
 
-import static com.iwei20.fmod.gen.fmod_studio_h.*;
+import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.*;
 
 public interface FModStudio {
 
