@@ -32,6 +32,7 @@ tasks.named<Test>("test") {
 
 tasks.withType<JavaCompile> {
     options.getCompilerArgs().add("-Xlint:-removal")
+    options.getCompilerArgs().add("--enable-preview")
 }
 
 tasks.withType<JavaCompile>().configureEach {
@@ -43,4 +44,16 @@ java {
 
     sourceCompatibility = JavaVersion.VERSION_21
     targetCompatibility = JavaVersion.VERSION_21
+
+    sourceSets{
+        named("main") {
+            java {
+                srcDir("src/generated/java")
+            }
+
+            compileClasspath += files("src/generated/java")
+            runtimeClasspath += files("src/generated/java")
+        }
+    }
+
 }
