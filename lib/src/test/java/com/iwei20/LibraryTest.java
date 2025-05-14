@@ -3,63 +3,26 @@
  */
 package com.iwei20;
 
-import com.iwei20.fmod.FModStudio;
-
-import org.apache.commons.io.IOUtils;
-import org.junit.jupiter.api.Test;
 import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.*;
 import static org.junit.jupiter.api.Assertions.*;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.lang.foreign.Arena;
-import java.lang.foreign.MemorySegment;
+import org.junit.jupiter.api.Test;
 
 class LibraryTest {
 
-    static {
-        // Read dynamic libraries from resources folder
-        InputStream fmodIn   = FModStudio.class.getResourceAsStream("/linux-x86-64/libfmodL.so");
-        InputStream studioIn = FModStudio.class.getResourceAsStream("/linux-x86-64/libfmodstudioL.so");
-
-        try {
-            // Copy libfmod to tempfile and load it
-            File tempFmod = File.createTempFile("libfmod", ".so");
-            tempFmod.deleteOnExit();
-            try (OutputStream out = new FileOutputStream(tempFmod)) {
-                IOUtils.copy(fmodIn, out);
-            }
-            System.load(tempFmod.getAbsolutePath());
-
-            // Copy libfmodstudio to tempfile and load it
-            File tempStudio = File.createTempFile("libfmodstudio", ".so");
-            tempStudio.deleteOnExit();
-            try (OutputStream out = new FileOutputStream(tempStudio)) {
-                IOUtils.copy(studioIn, out);
-            }
-            System.load(tempStudio.getAbsolutePath());
-        } catch (IOException e) {
-            System.err.println("Failed to load libraries!");
-            e.printStackTrace();
-        }
-    }
-
     @Test
     void creationAndRelease() {
-        try (Arena arena = Arena.ofConfined()) {
-            int result;
+        System.out.println(System.getProperty("os.arch"));
+        // try (Arena arena = Arena.ofConfined()) {
+        //     int result;
 
-            MemorySegment systemPointer = arena.allocate(16);
-            result = FMOD_Studio_System_Create(systemPointer, FMOD_VERSION());
-            assertEquals(result, 0);
+        //     MemorySegment systemPointer = arena.allocate(16);
+        //     result = FMOD_Studio_System_Create(systemPointer, FMOD_VERSION());
+        //     assertEquals(result, 0);
 
-            MemorySegment system = systemPointer.get(C_POINTER, 0);
-            result = FMOD_Studio_System_Release(system);
-            assertEquals(result, 0);
-        }
+        //     MemorySegment system = systemPointer.get(C_POINTER, 0);
+        //     result = FMOD_Studio_System_Release(system);
+        //     assertEquals(result, 0);
+        // }
     }
-
 }

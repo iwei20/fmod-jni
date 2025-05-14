@@ -8,6 +8,12 @@
 plugins {
     // Apply the java-library plugin for API and implementation separation.
     `java-library`
+    id("com.diffplug.spotless") version "7.+"
+    id("net.ltgt.errorprone") version "4.+"
+    id("net.ltgt.nullaway") version "2.+"
+    id("com.github.spotbugs") version "6.+"
+    `maven-publish`
+    pmd
 }
 
 repositories {
@@ -16,9 +22,13 @@ repositories {
 }
 
 dependencies {
+    errorprone("com.uber.nullaway:nullaway:0.12.7")
+    api("org.jspecify:jspecify:1.0.0")
+    errorprone("com.google.errorprone:error_prone_core:2.38.0")
+
     // Use JUnit Jupiter for testing.
     testImplementation(libs.junit.jupiter)
-    testImplementation("commons-io:commons-io:2.18.0")
+    implementation("commons-io:commons-io:2.18.0")
     testRuntimeOnly("org.junit.platform:junit-platform-launcher")
     implementation(files("fmod-jextract.jar")) // The FMOD and FMODStudio bindings
 }
@@ -39,6 +49,10 @@ tasks.withType<JavaCompile>().configureEach {
     options.release = 21
 }
 
+nullaway {
+    annotatedPackages.add("com.karpandsmeargle.adaptive")
+}
+
 java {
     withSourcesJar()
 
@@ -56,4 +70,33 @@ java {
         }
     }
 
+}
+
+publishing {
+    publications {
+        create<MavenPublication>("mavenJava") {
+            from(components["java"])
+        }
+    }
+
+    repositories {
+        mavenLocal()
+    }
+}
+
+spotless {
+    java {
+        importOrder()
+        removeUnusedImports()
+
+        palantirJavaFormat()
+        leadingTabsToSpaces(4)
+
+        formatAnnotations()
+    }
+    kotlinGradle {
+        trimTrailingWhitespace()
+        leadingTabsToSpaces(4)
+        endWithNewline()
+    }
 }
