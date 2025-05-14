@@ -6,7 +6,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Arrays;
-
+import java.util.Locale;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.IOUtils;
 
 public class FModLoad {
@@ -22,7 +23,7 @@ public class FModLoad {
     private static final String ARM = "arm";
 
     // Matched against osArch
-    private static final String[] X86_64_ALIASES = {"amd64", "x86-64", "x86_64", "x64" };
+    private static final String[] X86_64_ALIASES = {"amd64", "x86-64", "x86_64", "x64"};
     private static final String[] X86_ALIASES = {"ia32", "i386", "i486", "i586", "i686", "x86"};
     private static final String[] ARM64_ALIASES = {"arm64", "aarch64", "arm64-v8a"};
     private static final String[] ARM_ALIASES = {"arm", "armeabi-v7a"};
@@ -54,7 +55,7 @@ public class FModLoad {
     private static String resourcePath() {
         String osName = System.getProperty("os.name");
         String osArch = System.getProperty("os.arch");
-        String processedName = osName.toLowerCase().trim();
+        String processedName = osName.toLowerCase(Locale.getDefault()).trim();
 
         if (processedName.startsWith(WINDOWS)) {
             if (Arrays.asList(X86_64_ALIASES).contains(osArch)) return withSlashes(WINDOWS, X86_64);
@@ -78,11 +79,11 @@ public class FModLoad {
     }
 
     private static String suffix(String mappedName) {
-        return mappedName.split(".")[1];
+        return FilenameUtils.getExtension(mappedName);
     }
 
     private static String prefix(String mappedName) {
-        return mappedName.split(".")[0];
+        return FilenameUtils.getBaseName(mappedName);
     }
 
     private static boolean log = false;
@@ -101,8 +102,8 @@ public class FModLoad {
     private static final String STUDIO = "fmodstudio";
     private static final String FMODL = "fmodL";
     private static final String STUDIOL = "fmodstudioL";
-    
-    public static void loadFModLibraries() throws IOException {
+
+    public static void load() throws IOException {
         if (loaded) {
             return;
         }
@@ -114,25 +115,30 @@ public class FModLoad {
         String mappedStudio = System.mapLibraryName(studio);
 
         // Read dynamic libraries from resources folder
-        InputStream fmodIn   = FModLoad.class.getResourceAsStream(resourcePath() + mappedFMOD);
+        InputStream fmodIn = FModLoad.class.getResourceAsStream(resourcePath() + mappedFMOD);
         InputStream studioIn = FModLoad.class.getResourceAsStream(resourcePath() + mappedStudio);
 
-        // Copy fmod to tempfile and load it
-        File tempFMOD = File.createTempFile(prefix(mappedFMOD), suffix(mappedFMOD));
-        tempFMOD.deleteOnExit();
-        try (OutputStream out = new FileOutputStream(tempFMOD)) {
-            IOUtils.copy(fmodIn, out);
-        }
-        System.load(tempFMOD.getAbsolutePath());
+        try {
+            // Copy fmod to tempfile and load it
+            File tempFMOD = File.createTempFile(prefix(mappedFMOD), suffix(mappedFMOD));
+            tempFMOD.deleteOnExit();
+            try (OutputStream out = new FileOutputStream(tempFMOD)) {
+                IOUtils.copy(fmodIn, out);
+            }
+            System.load(tempFMOD.getAbsolutePath());
 
-        // Copy fmodstudio to tempfile and load it
-        File tempStudio = File.createTempFile(prefix(mappedStudio), suffix(mappedStudio));
-        tempStudio.deleteOnExit();
-        try (OutputStream out = new FileOutputStream(tempStudio)) {
-            IOUtils.copy(studioIn, out);
-        }
-        System.load(tempStudio.getAbsolutePath());
+            // Copy fmodstudio to tempfile and load it
+            File tempStudio = File.createTempFile(prefix(mappedStudio), suffix(mappedStudio));
+            tempStudio.deleteOnExit();
+            try (OutputStream out = new FileOutputStream(tempStudio)) {
+                IOUtils.copy(studioIn, out);
+            }
+            System.load(tempStudio.getAbsolutePath());
 
-        loaded = true;
+            loaded = true;
+        } finally {
+            fmodIn.close();
+            studioIn.close();
+        }
     }
 }

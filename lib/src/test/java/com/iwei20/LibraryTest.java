@@ -6,23 +6,49 @@ package com.iwei20;
 import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.*;
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.iwei20.fmod.FModLoad;
+import java.io.IOException;
+import java.lang.foreign.Arena;
+import java.lang.foreign.MemorySegment;
+
 import org.junit.jupiter.api.Test;
 
 class LibraryTest {
 
     @Test
-    void creationAndRelease() {
-        System.out.println(System.getProperty("os.arch"));
-        // try (Arena arena = Arena.ofConfined()) {
-        //     int result;
+    void load() {
+        try {
+            FModLoad.load();
+        } catch (IOException e) {
+            throw new RuntimeException();
+        }
+    }
 
-        //     MemorySegment systemPointer = arena.allocate(16);
-        //     result = FMOD_Studio_System_Create(systemPointer, FMOD_VERSION());
-        //     assertEquals(result, 0);
+    @Test
+    void loadDebug() {
+        try {
+            FModLoad.enableLogging();
+            FModLoad.load();
+        } catch (IOException e) {
+            throw new RuntimeException();
+        }
+    }
 
-        //     MemorySegment system = systemPointer.get(C_POINTER, 0);
-        //     result = FMOD_Studio_System_Release(system);
-        //     assertEquals(result, 0);
-        // }
+    @Test
+    void loadCreateRelease() {
+        try {
+            FModLoad.enableLogging();
+            FModLoad.load();
+        } catch (IOException e) {
+            throw new RuntimeException();
+        }
+        Arena arena = Arena.ofAuto();
+        MemorySegment systemPointer = arena.allocate(8);
+        int result = FMOD_Studio_System_Create(systemPointer, FMOD_VERSION());
+        assertEquals(result, 0);
+
+        MemorySegment system = systemPointer.get(C_POINTER, 0);
+        result = FMOD_Studio_System_Release(system);
+        assertEquals(result, 0);
     }
 }
