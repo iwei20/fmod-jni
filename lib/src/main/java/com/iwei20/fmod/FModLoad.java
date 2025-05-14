@@ -22,7 +22,7 @@ public class FModLoad {
     private static final String ARM = "arm";
 
     // Matched against osArch
-    private static final String[] X86_64_ALIASES = {"amd64", "x86-64", "x86_64"};
+    private static final String[] X86_64_ALIASES = {"amd64", "x86-64", "x86_64", "x64" };
     private static final String[] X86_ALIASES = {"ia32", "i386", "i486", "i586", "i686", "x86"};
     private static final String[] ARM64_ALIASES = {"arm64", "aarch64", "arm64-v8a"};
     private static final String[] ARM_ALIASES = {"arm", "armeabi-v7a"};
