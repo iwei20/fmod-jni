@@ -115,10 +115,8 @@ public class FModLoad {
         String mappedStudio = System.mapLibraryName(studio);
 
         // Read dynamic libraries from resources folder
-        InputStream fmodIn = FModLoad.class.getResourceAsStream(resourcePath() + mappedFMOD);
-        InputStream studioIn = FModLoad.class.getResourceAsStream(resourcePath() + mappedStudio);
 
-        try {
+        try (InputStream fmodIn = FModLoad.class.getResourceAsStream(resourcePath() + mappedFMOD)) {
             // Copy fmod to tempfile and load it
             File tempFMOD = File.createTempFile(prefix(mappedFMOD), suffix(mappedFMOD));
             tempFMOD.deleteOnExit();
@@ -126,7 +124,9 @@ public class FModLoad {
                 IOUtils.copy(fmodIn, out);
             }
             System.load(tempFMOD.getAbsolutePath());
+        }
 
+        try (InputStream studioIn = FModLoad.class.getResourceAsStream(resourcePath() + mappedStudio)) {
             // Copy fmodstudio to tempfile and load it
             File tempStudio = File.createTempFile(prefix(mappedStudio), suffix(mappedStudio));
             tempStudio.deleteOnExit();
@@ -134,11 +134,8 @@ public class FModLoad {
                 IOUtils.copy(studioIn, out);
             }
             System.load(tempStudio.getAbsolutePath());
-
-            loaded = true;
-        } finally {
-            fmodIn.close();
-            studioIn.close();
         }
+
+        loaded = true;
     }
 }
