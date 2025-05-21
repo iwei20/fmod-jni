@@ -19,12 +19,12 @@
         default = pkgs.mkShell {
           packages = with pkgs; [
             gradle
-            jdk
+            jdk23
             jextract-21
           ];
 
           env = {
-            JAVA_HOME = "${pkgs.jdk}/lib/openjdk";
+            JAVA_HOME = "${pkgs.jdk23}/lib/openjdk";
           };
         };
       });
