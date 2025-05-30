@@ -50,7 +50,7 @@ tasks.withType<JavaCompile>().configureEach {
 }
 
 nullaway {
-    annotatedPackages.add("com.karpandsmeargle.adaptive")
+    annotatedPackages.add("com.iwei20.fmod")
 }
 
 java {
