@@ -3,24 +3,28 @@
 
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixpkgs-unstable";
+    ivanpkgs.url = "github:iwei20/nixpkgs/fix-jextract";
   };
 
-  outputs = { self, nixpkgs }: 
+  outputs = { self, nixpkgs, ivanpkgs }: 
     let
       supportedSystems = [ "x86_64-linux" "aarch64-linux" "x86_64-darwin" "aarch64-darwin" ];
       forEachSupportedSystem = f: nixpkgs.lib.genAttrs supportedSystems (system: f {
         pkgs = import nixpkgs {
           inherit system;
         };
+        ivanpkgs = import ivanpkgs {
+          inherit system;
+        };
       });
     in
     {
-      devShells = forEachSupportedSystem ({ pkgs }: {
+      devShells = forEachSupportedSystem ({ pkgs, ivanpkgs }: {
         default = pkgs.mkShell {
           packages = with pkgs; [
             gradle
             jdk23
-            jextract-21
+            ivanpkgs.jextract
           ];
 
           env = {
