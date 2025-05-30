@@ -89,12 +89,12 @@ public class FMODException extends RuntimeException {
         "The specified recording driver has been disconnected.",
         "The length provided exceeds the allowable limit."
     };
- 
+
     private static final String FMOD_ERR_UNKNOWN_MESSAGE = "Unknown error.";
 
     public FMODException(String message) {
         super(message);
-    } 
+    }
 
     public static void errCheck(int code) {
         if (code == 0) {

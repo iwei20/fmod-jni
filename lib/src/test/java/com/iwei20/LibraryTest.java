@@ -7,10 +7,8 @@ import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 import com.iwei20.fmod.FModLoad;
+import com.iwei20.fmod.studio.FMODSystem;
 import java.io.IOException;
-import java.lang.foreign.Arena;
-import java.lang.foreign.MemorySegment;
-
 import org.junit.jupiter.api.Test;
 
 class LibraryTest {
@@ -42,13 +40,7 @@ class LibraryTest {
         } catch (IOException e) {
             throw new RuntimeException();
         }
-        Arena arena = Arena.ofAuto();
-        MemorySegment systemPointer = arena.allocate(8);
-        int result = FMOD_Studio_System_Create(systemPointer, FMOD_VERSION());
-        assertEquals(result, 0);
-
-        MemorySegment system = systemPointer.get(C_POINTER, 0);
-        result = FMOD_Studio_System_Release(system);
-        assertEquals(result, 0);
+        FMODSystem system = new FMODSystem();
+        system.close();
     }
 }
