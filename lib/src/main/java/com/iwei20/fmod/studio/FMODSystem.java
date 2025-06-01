@@ -7,6 +7,9 @@ import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.FMOD_VERSION;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
+import java.lang.foreign.SegmentAllocator;
+
+import com.iwei20.fmod.gen.fmodstudio.FMOD_STUDIO_ADVANCEDSETTINGS;
 
 public class FMODSystem implements AutoCloseable {
 
@@ -69,7 +72,32 @@ public class FMODSystem implements AutoCloseable {
             int studioUpdatePeriod,
             int idleSampleDatapoolSize,
             int streamingScheduleDelay,
-            String encryptionKey) {}
+            String encryptionKey) {
+        
+        /**
+         * Allocates a FMOD_STUDIO_ADVANCEDSETTINGS native struct corresponding
+         * to the advanced settings set in this record.
+         *
+         * @param allocator the allocator used to allocate the struct
+         * @return a memory segment containing the allocated struct
+         */
+        public MemorySegment allocate(SegmentAllocator allocator) {
+            MemorySegment advancedSettingsStruct = FMOD_STUDIO_ADVANCEDSETTINGS.allocate(allocator);
+            
+            // Since there is no clear return type for sizeof anyway, this cast is OK.
+            FMOD_STUDIO_ADVANCEDSETTINGS.cbsize(advancedSettingsStruct, (int) FMOD_STUDIO_ADVANCEDSETTINGS.sizeof());
+            FMOD_STUDIO_ADVANCEDSETTINGS.commandqueuesize(advancedSettingsStruct, commandQueueSize);
+            FMOD_STUDIO_ADVANCEDSETTINGS.handleinitialsize(advancedSettingsStruct, handleInitialSize);
+            FMOD_STUDIO_ADVANCEDSETTINGS.studioupdateperiod(advancedSettingsStruct, studioUpdatePeriod);
+            FMOD_STUDIO_ADVANCEDSETTINGS.idlesampledatapoolsize(advancedSettingsStruct, idleSampleDatapoolSize);
+            FMOD_STUDIO_ADVANCEDSETTINGS.streamingscheduledelay(advancedSettingsStruct, streamingScheduleDelay);
+            
+            MemorySegment encryptionKeyPointer = allocator.allocateFrom(encryptionKey);
+            FMOD_STUDIO_ADVANCEDSETTINGS.encryptionkey(advancedSettingsStruct, encryptionKeyPointer);
+            
+            return advancedSettingsStruct;
+        }
+    }
 
     /**
      * <ul>
