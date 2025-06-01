@@ -3,7 +3,7 @@ package com.iwei20.fmod.studio;
 import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.FMOD_Studio_System_Create;
 import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.FMOD_Studio_System_Release;
 import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h$shared.C_POINTER;
-import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h_1.FMOD_VERSION;
+import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.FMOD_VERSION;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
