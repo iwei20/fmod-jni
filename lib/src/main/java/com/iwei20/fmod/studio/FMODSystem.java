@@ -1,8 +1,8 @@
 package com.iwei20.fmod.studio;
 
+import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.C_POINTER;
 import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.FMOD_Studio_System_Create;
 import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.FMOD_Studio_System_Release;
-import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h$shared.C_POINTER;
 import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.FMOD_VERSION;
 
 import java.lang.foreign.Arena;
@@ -60,7 +60,7 @@ public class FMODSystem implements AutoCloseable {
      * <li>studioUpdatePeriod - Update period of Studio when in async mode, in milliseconds. Will be quantized to the nearest multiple of mixer duration. Units: Milliseconds Default: 20.
      * <li>idleSampleDatapoolSize - Size in bytes of sample data to retain in memory when no longer used, to avoid repeated disk I/O. Use -1 to disable. Units: Bytes. Default: 262144.
      * <li>streamingScheduleDelay - Specify the schedule delay for streams, in samples. Lower values can reduce latency when scheduling events containing streams but may cause scheduling issues if too small. Units: Samples. Default: 8192.
-     * <li>encryptionKey - Specify the key for loading sounds from encrypted banks. (UTF-8 string) 
+     * <li>encryptionKey - Specify the key for loading sounds from encrypted banks. (UTF-8 string)
      * </ul>
      */
     public static record AdvancedSettings(
