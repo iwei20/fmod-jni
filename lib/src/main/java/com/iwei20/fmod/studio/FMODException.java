@@ -107,4 +107,8 @@ public class FMODException extends RuntimeException {
 
         throw new FMODException(FMOD_ERR_UNKNOWN_MESSAGE);
     }
+
+    public static void errCheck(FMODResult result) {
+        errCheck(result.code());
+    }
 }
