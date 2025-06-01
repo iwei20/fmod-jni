@@ -26,6 +26,8 @@ public class FMODSystem implements AutoCloseable {
      * must be used if calls to {@link FMODSystem#FMODSystem} or {@link FMODSystem#close} could
      * overlap other Studio API calls. All other Studio API functions are thread safe
      * and may be called freely from any thread unless otherwise documented.
+     * 
+     * @throws FMODException if the call the Studio::System::create fails.
      */
     public FMODSystem() throws FMODException {
         arena = Arena.ofAuto();
@@ -47,6 +49,8 @@ public class FMODSystem implements AutoCloseable {
      * must be used if calls to {@link FMODSystem#FMODSystem} or {@link FMODSystem#close} could
      * overlap other Studio API calls. All other Studio API functions are thread safe
      * and may be called freely from any thread unless otherwise documented.
+     * 
+     * @throws FMODException if the call to Studio::System::release fails.
      */
     @Override
     public void close() throws FMODException {
