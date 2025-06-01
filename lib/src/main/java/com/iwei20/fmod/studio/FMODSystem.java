@@ -1,6 +1,9 @@
 package com.iwei20.fmod.studio;
 
-import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.*;
+import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.FMOD_Studio_System_Create;
+import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.FMOD_Studio_System_Release;
+import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h$shared.C_POINTER;
+import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h_1.FMOD_VERSION;
 
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
@@ -47,6 +50,19 @@ public class FMODSystem implements AutoCloseable {
         FMODException.errCheck(result);
     }
 
+    /**
+     * When calling {@link FMODSystem#setAdvancedSettings} any member other than cbsize may
+     * be set to zero to use the default value for that setting.
+     *
+     * <ul>
+     * <li>commandQueueSize - Command queue size for studio async processing. Units: Bytes. Default: 32768.
+     * <li>handleInitialSize - Initial size to allocate for handles. Memory for handles will grow as needed in pages. Units: Bytes. Default: 8192 * sizeof(void*).
+     * <li>studioUpdatePeriod - Update period of Studio when in async mode, in milliseconds. Will be quantized to the nearest multiple of mixer duration. Units: Milliseconds Default: 20.
+     * <li>idleSampleDatapoolSize - Size in bytes of sample data to retain in memory when no longer used, to avoid repeated disk I/O. Use -1 to disable. Units: Bytes. Default: 262144.
+     * <li>streamingScheduleDelay - Specify the schedule delay for streams, in samples. Lower values can reduce latency when scheduling events containing streams but may cause scheduling issues if too small. Units: Samples. Default: 8192.
+     * <li>encryptionKey - Specify the key for loading sounds from encrypted banks. (UTF-8 string) 
+     * </ul>
+     */
     public static record AdvancedSettings(
             int commandQueueSize,
             int handleInitialSize,
