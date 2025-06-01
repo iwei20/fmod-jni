@@ -51,7 +51,7 @@ public class FMODSystem implements AutoCloseable {
     }
 
     /**
-     * When calling {@link FMODSystem#setAdvancedSettings} any member other than cbsize may
+     * When calling {@link FMODSystem#setAdvancedSettings} any member may
      * be set to zero to use the default value for that setting.
      *
      * <ul>
