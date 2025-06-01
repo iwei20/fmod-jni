@@ -8,6 +8,7 @@ import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.FMOD_VERSION;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SegmentAllocator;
+import java.util.Optional;
 
 import com.iwei20.fmod.gen.fmodstudio.FMOD_STUDIO_ADVANCEDSETTINGS;
 
@@ -54,8 +55,9 @@ public class FMODSystem implements AutoCloseable {
     }
 
     /**
-     * When calling {@link FMODSystem#setAdvancedSettings} any member may
-     * be set to zero to use the default value for that setting.
+     * When calling {@link FMODSystem#setAdvancedSettings}, any int member may
+     * be set to zero, and any Optional member may be set empty, to use the default value
+     * for that setting.
      *
      * <ul>
      * <li>commandQueueSize - Command queue size for studio async processing. Units: Bytes. Default: 32768.
@@ -72,7 +74,7 @@ public class FMODSystem implements AutoCloseable {
             int studioUpdatePeriod,
             int idleSampleDatapoolSize,
             int streamingScheduleDelay,
-            String encryptionKey) {
+            Optional<String> encryptionKey) {
         
         /**
          * Allocates a FMOD_STUDIO_ADVANCEDSETTINGS native struct corresponding
@@ -92,7 +94,9 @@ public class FMODSystem implements AutoCloseable {
             FMOD_STUDIO_ADVANCEDSETTINGS.idlesampledatapoolsize(advancedSettingsStruct, idleSampleDatapoolSize);
             FMOD_STUDIO_ADVANCEDSETTINGS.streamingscheduledelay(advancedSettingsStruct, streamingScheduleDelay);
             
-            MemorySegment encryptionKeyPointer = allocator.allocateFrom(encryptionKey);
+            MemorySegment encryptionKeyPointer =
+                encryptionKey.map((String key) -> allocator.allocateFrom(key))
+                             .orElse(allocator.allocate(C_POINTER).fill((byte) 0));
             FMOD_STUDIO_ADVANCEDSETTINGS.encryptionkey(advancedSettingsStruct, encryptionKeyPointer);
             
             return advancedSettingsStruct;
