@@ -90,11 +90,11 @@ public enum FMODResult {
     FMOD_ERR_TOOMANYSAMPLES(81);
 
     private final int code;
-    
+
     private FMODResult(int code) {
         this.code = code;
     }
-    
+
     public int code() {
         return code;
     }
