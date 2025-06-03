@@ -1,6 +1,7 @@
 package com.iwei20.fmod.studio;
 
 import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.C_INT;
+import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.C_LONG;
 import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.C_POINTER;
 import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.FMOD_Studio_System_Create;
 import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.FMOD_Studio_System_Release;
@@ -87,30 +88,56 @@ public class FMODSystem implements AutoCloseable {
             int streamingScheduleDelay,
             Optional<String> encryptionKey) {
 
+        /**f
+         * Constructs an AdvancedSettings objects from an FMOD_STUDIO_ADVANCEDSETTINGS
+         * native struct.
+         *
+         * @param advancedSettingsPointer A memory segment pointing to a FMOD_STUDIO_ADVANCEDSETTINGS native struct.
+         * @return A corresponding AdvancedSettings object.
+         */
+        public static AdvancedSettings fromNative(MemorySegment advancedSettingsPointer) {
+            MemorySegment encryptionKeyPointer = FMOD_STUDIO_ADVANCEDSETTINGS.encryptionkey(advancedSettingsPointer);
+            Optional<String> encryptionKey;
+            if (encryptionKeyPointer.address() == 0) {
+                encryptionKey = Optional.empty();
+            } else {
+                encryptionKey = Optional.of(encryptionKeyPointer.getString(0));
+            }
+
+            return new AdvancedSettings(
+                FMOD_STUDIO_ADVANCEDSETTINGS.commandqueuesize(advancedSettingsPointer),
+                FMOD_STUDIO_ADVANCEDSETTINGS.handleinitialsize(advancedSettingsPointer),
+                FMOD_STUDIO_ADVANCEDSETTINGS.studioupdateperiod(advancedSettingsPointer),
+                FMOD_STUDIO_ADVANCEDSETTINGS.idlesampledatapoolsize(advancedSettingsPointer),
+                FMOD_STUDIO_ADVANCEDSETTINGS.streamingscheduledelay(advancedSettingsPointer),
+                encryptionKey
+            );
+        }
+
         /**
          * Allocates a FMOD_STUDIO_ADVANCEDSETTINGS native struct corresponding
          * to the advanced settings set in this record.
          *
          * @param allocator The allocator used to allocate the struct
-         * @return A memory segment containing the allocated struct
+         * @return A memory segment pointing to the allocated struct
          */
         public MemorySegment allocate(SegmentAllocator allocator) {
-            MemorySegment advancedSettingsStruct = FMOD_STUDIO_ADVANCEDSETTINGS.allocate(allocator);
+            MemorySegment advancedSettingsPointer = FMOD_STUDIO_ADVANCEDSETTINGS.allocate(allocator);
 
             // Since there is no clear return type for sizeof anyway, this cast is OK.
-            FMOD_STUDIO_ADVANCEDSETTINGS.cbsize(advancedSettingsStruct, (int) FMOD_STUDIO_ADVANCEDSETTINGS.sizeof());
-            FMOD_STUDIO_ADVANCEDSETTINGS.commandqueuesize(advancedSettingsStruct, commandQueueSize);
-            FMOD_STUDIO_ADVANCEDSETTINGS.handleinitialsize(advancedSettingsStruct, handleInitialSize);
-            FMOD_STUDIO_ADVANCEDSETTINGS.studioupdateperiod(advancedSettingsStruct, studioUpdatePeriod);
-            FMOD_STUDIO_ADVANCEDSETTINGS.idlesampledatapoolsize(advancedSettingsStruct, idleSampleDatapoolSize);
-            FMOD_STUDIO_ADVANCEDSETTINGS.streamingscheduledelay(advancedSettingsStruct, streamingScheduleDelay);
+            FMOD_STUDIO_ADVANCEDSETTINGS.cbsize(advancedSettingsPointer, (int) FMOD_STUDIO_ADVANCEDSETTINGS.sizeof());
+            FMOD_STUDIO_ADVANCEDSETTINGS.commandqueuesize(advancedSettingsPointer, commandQueueSize);
+            FMOD_STUDIO_ADVANCEDSETTINGS.handleinitialsize(advancedSettingsPointer, handleInitialSize);
+            FMOD_STUDIO_ADVANCEDSETTINGS.studioupdateperiod(advancedSettingsPointer, studioUpdatePeriod);
+            FMOD_STUDIO_ADVANCEDSETTINGS.idlesampledatapoolsize(advancedSettingsPointer, idleSampleDatapoolSize);
+            FMOD_STUDIO_ADVANCEDSETTINGS.streamingscheduledelay(advancedSettingsPointer, streamingScheduleDelay);
 
             MemorySegment encryptionKeyPointer = encryptionKey
                     .map((String key) -> allocator.allocateFrom(key))
-                    .orElse(allocator.allocate(C_POINTER).fill((byte) 0));
-            FMOD_STUDIO_ADVANCEDSETTINGS.encryptionkey(advancedSettingsStruct, encryptionKeyPointer);
+                    .orElse(MemorySegment.NULL);
+            FMOD_STUDIO_ADVANCEDSETTINGS.encryptionkey(advancedSettingsPointer, encryptionKeyPointer);
 
-            return advancedSettingsStruct;
+            return advancedSettingsPointer;
         }
     }
 
@@ -315,21 +342,21 @@ public class FMODSystem implements AutoCloseable {
          * to the advanced settings set in this record.
          *
          * @param allocator The allocator used to allocate the struct
-         * @return A memory segment containing the allocated struct
+         * @return A memory segment pointing to the allocated struct
          */
         public MemorySegment allocate(Arena arena) {
-            MemorySegment bankInfoStruct = FMOD_STUDIO_BANK_INFO.allocate(arena);
+            MemorySegment bankInfoPointer = FMOD_STUDIO_BANK_INFO.allocate(arena);
 
-            FMOD_STUDIO_BANK_INFO.size(bankInfoStruct, (int) FMOD_STUDIO_BANK_INFO.sizeof());
-            FMOD_STUDIO_BANK_INFO.userdata(bankInfoStruct, userData);
-            FMOD_STUDIO_BANK_INFO.userdatalength(bankInfoStruct, userDataLength);
-            FMOD_STUDIO_BANK_INFO.opencallback(bankInfoStruct, FMOD_FILE_OPEN_CALLBACK.allocate(openCallback, arena));
+            FMOD_STUDIO_BANK_INFO.size(bankInfoPointer, (int) FMOD_STUDIO_BANK_INFO.sizeof());
+            FMOD_STUDIO_BANK_INFO.userdata(bankInfoPointer, userData);
+            FMOD_STUDIO_BANK_INFO.userdatalength(bankInfoPointer, userDataLength);
+            FMOD_STUDIO_BANK_INFO.opencallback(bankInfoPointer, FMOD_FILE_OPEN_CALLBACK.allocate(openCallback, arena));
             FMOD_STUDIO_BANK_INFO.closecallback(
-                    bankInfoStruct, FMOD_FILE_CLOSE_CALLBACK.allocate(closeCallback, arena));
-            FMOD_STUDIO_BANK_INFO.readcallback(bankInfoStruct, FMOD_FILE_READ_CALLBACK.allocate(readCallback, arena));
-            FMOD_STUDIO_BANK_INFO.seekcallback(bankInfoStruct, FMOD_FILE_SEEK_CALLBACK.allocate(seekCallback, arena));
+                    bankInfoPointer, FMOD_FILE_CLOSE_CALLBACK.allocate(closeCallback, arena));
+            FMOD_STUDIO_BANK_INFO.readcallback(bankInfoPointer, FMOD_FILE_READ_CALLBACK.allocate(readCallback, arena));
+            FMOD_STUDIO_BANK_INFO.seekcallback(bankInfoPointer, FMOD_FILE_SEEK_CALLBACK.allocate(seekCallback, arena));
 
-            return bankInfoStruct;
+            return bankInfoPointer;
         }
     }
 
@@ -355,18 +382,18 @@ public class FMODSystem implements AutoCloseable {
          * to the advanced settings set in this record.
          *
          * @param allocator The allocator used to allocate the struct
-         * @return A memory segment containing the allocated struct
+         * @return A memory segment pointing to the allocated struct
          */
         public MemorySegment allocate(SegmentAllocator allocator) {
-            MemorySegment bufferInfoStruct = FMOD_STUDIO_BUFFER_INFO.allocate(allocator);
+            MemorySegment bufferInfoPointer = FMOD_STUDIO_BUFFER_INFO.allocate(allocator);
 
-            FMOD_STUDIO_BUFFER_INFO.currentusage(bufferInfoStruct, currentUsage);
-            FMOD_STUDIO_BUFFER_INFO.peakusage(bufferInfoStruct, peakUsage);
-            FMOD_STUDIO_BUFFER_INFO.capacity(bufferInfoStruct, capacity);
-            FMOD_STUDIO_BUFFER_INFO.stallcount(bufferInfoStruct, stallCount);
-            FMOD_STUDIO_BUFFER_INFO.stalltime(bufferInfoStruct, stallTime);
+            FMOD_STUDIO_BUFFER_INFO.currentusage(bufferInfoPointer, currentUsage);
+            FMOD_STUDIO_BUFFER_INFO.peakusage(bufferInfoPointer, peakUsage);
+            FMOD_STUDIO_BUFFER_INFO.capacity(bufferInfoPointer, capacity);
+            FMOD_STUDIO_BUFFER_INFO.stallcount(bufferInfoPointer, stallCount);
+            FMOD_STUDIO_BUFFER_INFO.stalltime(bufferInfoPointer, stallTime);
 
-            return bufferInfoStruct;
+            return bufferInfoPointer;
         }
     }
 
