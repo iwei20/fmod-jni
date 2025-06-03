@@ -17,8 +17,6 @@ import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SegmentAllocator;
 import java.util.Optional;
 
-import com.iwei20.fmod.gen.fmodstudio.FMOD_STUDIO_ADVANCEDSETTINGS;
-
 public class FMODSystem implements AutoCloseable {
 
     private final Arena arena;
@@ -33,8 +31,9 @@ public class FMODSystem implements AutoCloseable {
      * must be used if calls to {@link FMODSystem#FMODSystem} or {@link FMODSystem#close} could
      * overlap other Studio API calls. All other Studio API functions are thread safe
      * and may be called freely from any thread unless otherwise documented.
-     * 
+     *
      * @throws FMODException if the call the Studio::System::create fails.
+     * @see https://www.fmod.com/docs/2.03/api/studio-guide.html#creating-the-studio-system
      */
     public FMODSystem() throws FMODException {
         arena = Arena.ofAuto();
@@ -56,8 +55,9 @@ public class FMODSystem implements AutoCloseable {
      * must be used if calls to {@link FMODSystem#FMODSystem} or {@link FMODSystem#close} could
      * overlap other Studio API calls. All other Studio API functions are thread safe
      * and may be called freely from any thread unless otherwise documented.
-     * 
+     *
      * @throws FMODException if the call to Studio::System::release fails.
+     * @see https://www.fmod.com/docs/2.03/api/studio-guide.html#creating-the-studio-system
      */
     @Override
     public void close() throws FMODException {
@@ -70,14 +70,12 @@ public class FMODSystem implements AutoCloseable {
      * be set to zero, and any Optional member may be set empty, to use the default value
      * for that setting.
      *
-     * <ul>
-     * <li>commandQueueSize - Command queue size for studio async processing. Units: Bytes. Default: 32768.
-     * <li>handleInitialSize - Initial size to allocate for handles. Memory for handles will grow as needed in pages. Units: Bytes. Default: 8192 * sizeof(void*).
-     * <li>studioUpdatePeriod - Update period of Studio when in async mode, in milliseconds. Will be quantized to the nearest multiple of mixer duration. Units: Milliseconds Default: 20.
-     * <li>idleSampleDatapoolSize - Size in bytes of sample data to retain in memory when no longer used, to avoid repeated disk I/O. Use -1 to disable. Units: Bytes. Default: 262144.
-     * <li>streamingScheduleDelay - Specify the schedule delay for streams, in samples. Lower values can reduce latency when scheduling events containing streams but may cause scheduling issues if too small. Units: Samples. Default: 8192.
-     * <li>encryptionKey - Specify the key for loading sounds from encrypted banks. (UTF-8 string)
-     * </ul>
+     * @param commandQueueSize Command queue size for studio async processing. Units: Bytes. Default: 32768.
+     * @param handleInitialSize Initial size to allocate for handles. Memory for handles will grow as needed in pages. Units: Bytes. Default: 8192 * sizeof(void*).
+     * @param studioUpdatePeriod Update period of Studio when in async mode, in milliseconds. Will be quantized to the nearest multiple of mixer duration. Units: Milliseconds Default: 20.
+     * @param idleSampleDatapoolSize Size in bytes of sample data to retain in memory when no longer used, to avoid repeated disk I/O. Use -1 to disable. Units: Bytes. Default: 262144.
+     * @param streamingScheduleDelay Specify the schedule delay for streams, in samples. Lower values can reduce latency when scheduling events containing streams but may cause scheduling issues if too small. Units: Samples. Default: 8192.
+     * @param encryptionKey Specify the key for loading sounds from encrypted banks. (UTF-8 string)
      */
     public static record AdvancedSettings(
             int commandQueueSize,
@@ -86,17 +84,17 @@ public class FMODSystem implements AutoCloseable {
             int idleSampleDatapoolSize,
             int streamingScheduleDelay,
             Optional<String> encryptionKey) {
-        
+
         /**
          * Allocates a FMOD_STUDIO_ADVANCEDSETTINGS native struct corresponding
          * to the advanced settings set in this record.
          *
-         * @param allocator the allocator used to allocate the struct
-         * @return a memory segment containing the allocated struct
+         * @param allocator The allocator used to allocate the struct
+         * @return A memory segment containing the allocated struct
          */
         public MemorySegment allocate(SegmentAllocator allocator) {
             MemorySegment advancedSettingsStruct = FMOD_STUDIO_ADVANCEDSETTINGS.allocate(allocator);
-            
+
             // Since there is no clear return type for sizeof anyway, this cast is OK.
             FMOD_STUDIO_ADVANCEDSETTINGS.cbsize(advancedSettingsStruct, (int) FMOD_STUDIO_ADVANCEDSETTINGS.sizeof());
             FMOD_STUDIO_ADVANCEDSETTINGS.commandqueuesize(advancedSettingsStruct, commandQueueSize);
@@ -104,12 +102,12 @@ public class FMODSystem implements AutoCloseable {
             FMOD_STUDIO_ADVANCEDSETTINGS.studioupdateperiod(advancedSettingsStruct, studioUpdatePeriod);
             FMOD_STUDIO_ADVANCEDSETTINGS.idlesampledatapoolsize(advancedSettingsStruct, idleSampleDatapoolSize);
             FMOD_STUDIO_ADVANCEDSETTINGS.streamingscheduledelay(advancedSettingsStruct, streamingScheduleDelay);
-            
-            MemorySegment encryptionKeyPointer =
-                encryptionKey.map((String key) -> allocator.allocateFrom(key))
-                             .orElse(allocator.allocate(C_POINTER).fill((byte) 0));
+
+            MemorySegment encryptionKeyPointer = encryptionKey
+                    .map((String key) -> allocator.allocateFrom(key))
+                    .orElse(allocator.allocate(C_POINTER).fill((byte) 0));
             FMOD_STUDIO_ADVANCEDSETTINGS.encryptionkey(advancedSettingsStruct, encryptionKeyPointer);
-            
+
             return advancedSettingsStruct;
         }
     }
