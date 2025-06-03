@@ -12,6 +12,8 @@ import com.iwei20.fmod.gen.fmodstudio.FMOD_FILE_READ_CALLBACK;
 import com.iwei20.fmod.gen.fmodstudio.FMOD_FILE_SEEK_CALLBACK;
 import com.iwei20.fmod.gen.fmodstudio.FMOD_STUDIO_ADVANCEDSETTINGS;
 import com.iwei20.fmod.gen.fmodstudio.FMOD_STUDIO_BANK_INFO;
+import com.iwei20.fmod.gen.fmodstudio.FMOD_STUDIO_BUFFER_INFO;
+
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SegmentAllocator;
@@ -328,6 +330,43 @@ public class FMODSystem implements AutoCloseable {
             FMOD_STUDIO_BANK_INFO.seekcallback(bankInfoStruct, FMOD_FILE_SEEK_CALLBACK.allocate(seekCallback, arena));
 
             return bankInfoStruct;
+        }
+    }
+
+    /**
+     * Information for a single buffer in FMOD Studio.
+     * 
+     * @param currentUsage Current buffer usage in bytes.
+     * @param peakUsage Peak buffer usage in bytes.
+     * @param capacityBuffer capacity in bytes.
+     * @param stallCount Cumulative number of stalls due to buffer overflow. 
+     * @param stallTime Cumulative amount of time stalled due to buffer overflow, in seconds.
+     * @see BufferUsage
+     */
+    public static record BufferInfo(
+            int currentUsage,
+            int peakUsage,
+            int capacity,
+            int stallCount,
+            float stallTime) {
+
+        /**
+         * Allocates a FMOD_STUDIO_BUFFER_INFO native struct corresponding
+         * to the advanced settings set in this record.
+         *
+         * @param allocator The allocator used to allocate the struct
+         * @return A memory segment containing the allocated struct
+         */
+        public MemorySegment allocate(SegmentAllocator allocator) {
+            MemorySegment bufferInfoStruct = FMOD_STUDIO_BUFFER_INFO.allocate(allocator);
+
+            FMOD_STUDIO_BUFFER_INFO.currentusage(bufferInfoStruct, currentUsage);
+            FMOD_STUDIO_BUFFER_INFO.peakusage(bufferInfoStruct, peakUsage);
+            FMOD_STUDIO_BUFFER_INFO.capacity(bufferInfoStruct, capacity);
+            FMOD_STUDIO_BUFFER_INFO.stallcount(bufferInfoStruct, stallCount);
+            FMOD_STUDIO_BUFFER_INFO.stalltime(bufferInfoStruct, stallTime);
+
+            return bufferInfoStruct;
         }
     }
 
