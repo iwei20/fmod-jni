@@ -1,10 +1,17 @@
 package com.iwei20.fmod.studio;
 
+import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.C_INT;
 import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.C_POINTER;
 import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.FMOD_Studio_System_Create;
 import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.FMOD_Studio_System_Release;
 import static com.iwei20.fmod.gen.fmodstudio.fmod_studio_h.FMOD_VERSION;
 
+import com.iwei20.fmod.gen.fmodstudio.FMOD_FILE_CLOSE_CALLBACK;
+import com.iwei20.fmod.gen.fmodstudio.FMOD_FILE_OPEN_CALLBACK;
+import com.iwei20.fmod.gen.fmodstudio.FMOD_FILE_READ_CALLBACK;
+import com.iwei20.fmod.gen.fmodstudio.FMOD_FILE_SEEK_CALLBACK;
+import com.iwei20.fmod.gen.fmodstudio.FMOD_STUDIO_ADVANCEDSETTINGS;
+import com.iwei20.fmod.gen.fmodstudio.FMOD_STUDIO_BANK_INFO;
 import java.lang.foreign.Arena;
 import java.lang.foreign.MemorySegment;
 import java.lang.foreign.SegmentAllocator;
@@ -104,6 +111,225 @@ public class FMODSystem implements AutoCloseable {
             FMOD_STUDIO_ADVANCEDSETTINGS.encryptionkey(advancedSettingsStruct, encryptionKeyPointer);
             
             return advancedSettingsStruct;
+        }
+    }
+
+    /**
+     * Callback for opening a file.
+     *
+     * Return the appropriate error code such as {@link FMODResult#FMOD_ERR_FILE_NOTFOUND}
+     * if the file fails to open. If the callback is from {@link FMODSystem#attachFileSystem},
+     * then the return value is ignored.
+     *
+     * @see FMODSystem#setFileSystem
+     * @see FileCloseCallback
+     * @see FileReadCallback
+     * @see FileSeekCallback
+     * @see FileAsyncReadCallback
+     * @see FileAsyncCancelCallback
+     *
+     * <b>Experimental.</b> This API is subject to change if
+     * I find a better way to represent file handles.
+     */
+    public static interface FileOpenCallback extends FMOD_FILE_OPEN_CALLBACK.Function {
+        /**
+         * Outputs of the callback.
+         *
+         * @param fileSize Size of the file. Units: Bytes.
+         * @param handle File handle to identify this file in future file callbacks.
+         * @param errCode Result of the callback.
+         */
+        public static record Out(int fileSize, MemorySegment handle, FMODResult errCode) {}
+
+        @Override
+        default int apply(MemorySegment name, MemorySegment filesize, MemorySegment handle, MemorySegment userdata) {
+            String strName = name.getString(0);
+            Out result = call(strName, userdata);
+            filesize.set(C_INT, 0, result.fileSize());
+            handle.set(C_POINTER, 0, result.handle()); // Double pointer, as opposed to the result's single pointer
+            return result.errCode().code();
+        }
+
+        /**
+         * Callback for opening a file.
+         *
+         * <b>Experimental.</b> This API is subject to change if
+         * I find a better way to represent file handles.
+         *
+         * @param name File name or identifier. (UTF-8 string)
+         * @param userData User value set by {@link CreateSoundEXInfo#fileUserData} or {@link BankInfo#userData}.
+         * @return See the {@link Out} record's documentation for return information.
+         */
+        public Out call(String name, MemorySegment userData);
+    }
+
+    /**
+     * Callback for closing a file.
+     *
+     * Close any user created file handle and perform any cleanup necessary for the file here.
+     * If the callback is from {@link FMODSystem#attachFileSystem}, then the return value is ignored.
+     *
+     * @see FMODSystem#setFileSystem
+     * @see FileOpenCallback
+     * @see FileReadCallback
+     * @see FileSeekCallback
+     * @see FileAsyncReadCallback
+     * @see FileAsyncCancelCallback
+     *
+     * <b>Experimental.</b> This API is subject to change if
+     * I find a better way to represent file handles.
+     */
+    public static interface FileCloseCallback extends FMOD_FILE_CLOSE_CALLBACK.Function {
+        @Override
+        default int apply(MemorySegment handle, MemorySegment userdata) {
+            FMODResult result = call(handle, userdata);
+            return result.code();
+        }
+
+        /**
+         * Callback for closing a file.
+         *
+         * <b>Experimental.</b> This API is subject to change if
+         * I find a better way to represent file handles.
+         *
+         * @param handle File handle that was returned in {@link FileOpenCallback#call}.
+         * @param userData User value set by {@link CreateSoundEXInfo#fileUserData} or {@link BankInfo#userData}.
+         * @return Result of the callback.
+         */
+        public FMODResult call(MemorySegment handle, MemorySegment userData);
+    }
+
+    /**
+     * Callback for reading from a file.
+     *
+     * If the callback is from {@link FMODSystem#attachFileSystem}, then the return value is ignored.
+     *
+     * If there is not enough data to read the requested number of bytes, return fewer bytes in the
+     * bytesread parameter and and return {@link FMODResult#FMOD_ERR_FILE_EOF}.
+     *
+     * @see FMODSystem#setFileSystem
+     * @see FileOpenCallback
+     * @see FileCloseCallback
+     * @see FileSeekCallback
+     * @see FileAsyncReadCallback
+     * @see FileAsyncCancelCallback
+     *
+     * <b>Experimental.</b> This API is subject to change if
+     * I find a better way to represent file handles.
+     */
+    public static interface FileReadCallback extends FMOD_FILE_READ_CALLBACK.Function {
+        /**
+         * Outputs of the callback.
+         *
+         * @param bytesRead Number of bytes read into buffer.
+         * @param errCode Result of the callback.
+         */
+        public static record Out(int bytesRead, FMODResult errCode) {}
+
+        @Override
+        default int apply(
+                MemorySegment handle,
+                MemorySegment buffer,
+                int sizebytes,
+                MemorySegment bytesread,
+                MemorySegment userdata) {
+            Out result = call(handle, sizebytes, userdata, buffer);
+            bytesread.set(C_INT, 0, result.bytesRead());
+            return result.errCode().code();
+        }
+
+        /**
+         * Callback for reading from a file.
+         *
+         * <b>Experimental.</b> This API is subject to change if
+         * I find a better way to represent file handles.
+         *
+         * @param handle File handle that was returned in {@link FileOpenCallback#call}.
+         * @param sizeBytes Number of bytes to read into buffer. Units: Bytes.
+         * @param userData User value set by {@link CreateSoundEXInfo#fileUserData} or {@link BankInfo#userData}.
+         * @param buffer Output for you to mutate! Buffer to read data into.
+         * @return Mutates buffer. See the {@link Out} record's documentation for return information.
+         */
+        public Out call(MemorySegment handle, int sizeBytes, MemorySegment userData, MemorySegment buffer);
+    }
+
+    /**
+     * Callback for seeking within a file.
+     *
+     * If the callback is from {@link FMODSystem#attachFileSystem}, then the return value is ignored.
+     *
+     * @see FMODSystem#setFileSystem
+     * @see FileOpenCallback
+     * @see FileCloseCallback
+     * @see FileReadCallback
+     * @see FileAsyncReadCallback
+     * @see FileAsyncCancelCallback
+     *
+     * <b>Experimental.</b> This API is subject to change if
+     * I find a better way to represent file handles.
+     */
+    public static interface FileSeekCallback extends FMOD_FILE_SEEK_CALLBACK.Function {
+        @Override
+        default int apply(MemorySegment handle, int pos, MemorySegment userdata) {
+            FMODResult result = call(handle, pos, userdata);
+            return result.code();
+        }
+
+        /**
+         * Callback for seeking within a file.
+         *
+         * @param handle File handle that returned in {@link FileOpenCallback}
+         * @param pos Absolute position to seek to in file. Units: Bytes.
+         * @param userData User value set by {@link CreateSoundEXInfo#fileUserData} or {@link BankInfo#userData}.
+         * @return Result of the callback.
+         */
+        public FMODResult call(MemorySegment handle, int pos, MemorySegment userData);
+    }
+
+    /**
+     * Information for loading a bank using user callbacks.
+     *
+     * @param userData (optional) data to be passed to the file callbacks.
+     * If {@link BankInfo#userDataLength} is zero, this must remain valid until the bank
+     * has been unloaded and all calls to {@link BankInfo#openCallback} have been matched by
+     * a call to {@link BankInfo#closeCallback}.
+     * @param userDataLength Length of user data in bytes. If non-zero the {@link BankInfo#userData}
+     * will be copied internally; this copy will be kept until the bank has been unloaded and all
+     * calls to {@link BankInfo#openCallback} have been matched by a call to {@link BankInfo#closeCallback}.
+     * @param openCallback Callback for opening the bank file.
+     * @param closeCallback Callback for closing the bank file.
+     * @param readCallback Callback for reading from the bank file.
+     * @param seekCallback Callback for seeking within the bank file.
+     * @see FMODSystem#loadBankCustom
+     */
+    public static record BankInfo(
+            MemorySegment userData,
+            int userDataLength,
+            FileOpenCallback openCallback,
+            FileCloseCallback closeCallback,
+            FileReadCallback readCallback,
+            FileSeekCallback seekCallback) {
+
+        /**
+         * Allocates a FMOD_STUDIO_ADVANCEDSETTINGS native struct corresponding
+         * to the advanced settings set in this record.
+         *
+         * @param allocator The allocator used to allocate the struct
+         * @return A memory segment containing the allocated struct
+         */
+        public MemorySegment allocate(Arena arena) {
+            MemorySegment bankInfoStruct = FMOD_STUDIO_BANK_INFO.allocate(arena);
+
+            FMOD_STUDIO_BANK_INFO.size(bankInfoStruct, (int) FMOD_STUDIO_BANK_INFO.sizeof());
+            FMOD_STUDIO_BANK_INFO.userdata(bankInfoStruct, userData);
+            FMOD_STUDIO_BANK_INFO.userdatalength(bankInfoStruct, userDataLength);
+            FMOD_STUDIO_BANK_INFO.opencallback(bankInfoStruct, FMOD_FILE_OPEN_CALLBACK.allocate(openCallback, arena));
+            FMOD_STUDIO_BANK_INFO.closecallback(
+                    bankInfoStruct, FMOD_FILE_CLOSE_CALLBACK.allocate(closeCallback, arena));
+            FMOD_STUDIO_BANK_INFO.readcallback(bankInfoStruct, FMOD_FILE_READ_CALLBACK.allocate(readCallback, arena));
+            FMOD_STUDIO_BANK_INFO.seekcallback(bankInfoStruct, FMOD_FILE_SEEK_CALLBACK.allocate(seekCallback, arena));
+
+            return bankInfoStruct;
         }
     }
 
